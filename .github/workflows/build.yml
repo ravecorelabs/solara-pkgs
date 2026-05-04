@@ -44,10 +44,16 @@ jobs:
             # Build (--as Root allows running as root in container)
             makepkg -sir --noconfirm --noprogress --asroot
             
+            # Debug: show what was built
+            ls -la *.pkg.tar.zst 2>/dev/null || echo "No package file found!"
+            
             # Move to output
             mkdir -p $GITHUB_WORKSPACE/packages
             cp *.pkg.tar.zst $GITHUB_WORKSPACE/packages/ 2>/dev/null || true
           done
+          
+          # Debug: show what's in output dir
+          ls -la $GITHUB_WORKSPACE/packages/
 
       - name: Create repo index
         run: |

@@ -17,10 +17,11 @@ jobs:
 
       - name: Build yay
         run: |
+          useradd -m builder
           cd /tmp
           git clone https://aur.archlinux.org/yay.git
-          cd yay
-          makepkg -s --noconfirm --noprogress
+          chown -R builder:builder yay
+          su - builder -c "cd /tmp/yay && makepkg -s --noconfirm --noprogress"
 
       - name: Create package database
         run: |

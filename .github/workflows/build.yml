@@ -15,30 +15,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install build tools
-        run: |
-          pacman -Sy --noconfirm git base-devel go python-yaml
+        run: pacman -Sy --noconfirm git base-devel go python-yaml
 
       - name: Create builder user
-        run: useradd -m builder && echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+        run: |
+          useradd -m builder
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
       - name: Build packages
         run: |
           mkdir -p /tmp/pkgout
-          python3 - << 'PYEOF'
-import yaml, subprocess, os
-
-with open("packages.yaml") as f:
-    pkgs = yaml.safe_load(f)["packages"]
-
-for pkg in pkgs:
-    subprocess.run(["bash", "-c", f"""
-        cd /tmp
-        git clone https://aur.archlinux.org/{pkg}.git
-        chown -R builder:builder /tmp/{pkg}
-        su - builder -c 'cd /tmp/{pkg} && makepkg -s --noconfirm --noprogress'
-        cp /tmp/{pkg}/*.pkg.tar.zst /tmp/pkgout/ || true
-    """], check=True)
-PYEOF
+          python3 build-packages.py
 
       - name: Create package database
         run: |
@@ -79,7 +66,7 @@ PYEOF
             ```
             [solara-pkgs]
             SigLevel = Optional TrustAll
-            Server = ${{ github.server_url }}/${{ github.repository }}/releases/download/latest
+            Server = https://github.com/ravecorelabs/solara-pkgs/releases/download/latest
             ```
           draft: false
           prerelease: false

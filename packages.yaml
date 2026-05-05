@@ -1,5 +1,3 @@
-# Packages to build for Solara PKGS
-# Add package names here - one per line
 packages:
   - yay
-  - pantheon-desktop
+  - visual-studio-code-bin

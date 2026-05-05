@@ -2,63 +2,44 @@ name: Build AUR Packages
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * *'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: archlinux:latest
+    container: ghcr.io/archlinux/archlinux:latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      - name: Initialize pacman
-        run: |
-          pacman-key --init
-          pacman-key --populate
-          pacman -Sy --noconfirm archlinux-keyring
 
       - name: Install build tools
         run: |
           pacman -Sy --noconfirm git base-devel
 
-      - name: Read packages to build
-        id: packages
+      - name: Build yay
         run: |
-          PACKAGES=$(cat packages.yaml | grep -E '^\s+-\s+' | sed 's/^\s*-\s*//' | tr '\n' ' ')
-          echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
-          echo "Packages to build: $PACKAGES"
+          # Install go (yay dependency) as root
+          pacman -S --noconfirm go
 
-      - name: Build each package
-        run: |
-          PACKAGES="${{ steps.packages.outputs.packages }}"
-          for pkg in $PACKAGES; do
-            echo "Building $pkg..."
-            cd /tmp
-            git clone https://aur.archlinux.org/$pkg.git
-            cd /tmp/$pkg
-            makepkg -sir --noconfirm --noprogress --asroot
-            ls -la *.pkg.tar.zst 2>/dev/null || echo "No package file found!"
-            mkdir -p $GITHUB_WORKSPACE/packages
-            cp *.pkg.tar.zst $GITHUB_WORKSPACE/packages/ 2>/dev/null || true
-          done
-          ls -la $GITHUB_WORKSPACE/packages/
+          # Create builder user and build
+          useradd -m builder
+          cd /tmp
+          git clone https://aur.archlinux.org/yay.git
+          chown -R builder:builder yay
+          su - builder -c "cd /tmp/yay && makepkg -s --noconfirm --noprogress"
 
-      - name: Create repo index
+      - name: Create package database
         run: |
-          cd $GITHUB_WORKSPACE/packages
-          repo-add solara-pkgs.db.tar.gz *.pkg.tar.zst || true
+          mkdir -p /github/workspace/packages/x86_64
+          cp /tmp/yay/*.pkg.tar.zst /github/workspace/packages/x86_64/
+          cd /github/workspace/packages
+          repo-add solara-pkgs.db.tar.gz x86_64/*.pkg.tar.zst
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: solara-packages
-          path: |
-            packages/*.pkg.tar.zst
-            packages/*.db.tar.gz
-            packages/*.files.tar.gz
-          retention-days: 30
+          path: packages/
+          retention-days: 7
 
   release:
     needs: build
@@ -73,18 +54,18 @@ jobs:
           path: packages
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: packages/*.pkg.tar.zst
+          files: packages/x86_64/*.pkg.tar.zst
           name: Latest Packages
           body: |
             Auto-built AUR packages for Solara Linux.
-            
-            Add to pacman.conf:
+
+            Add to `/etc/pacman.conf`:
             ```
             [solara-pkgs]
             SigLevel = Optional TrustAll
-            Server = ${{ github.server_url }}/${{ github.repository }}/releases/latest/download/$arch
+            Server = ${{ github.server_url }}/${{ github.repository }}/releases/download/latest/x86_64
             ```
-        draft: true
-        prerelease: false
+          draft: false
+          prerelease: false

@@ -96,7 +96,7 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
     environment:
@@ -106,18 +106,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: solara-packages
-          path: packages
+      - name: Download release assets
+        run: |
+          mkdir -p site/x86_64
+          gh release download latest --dir site/x86_64 --pattern "*.pkg.tar.zst" || true
+          gh release download latest --dir site/x86_64 --pattern "*.db.tar.gz" || true
+          gh release download latest --dir site/x86_64 --pattern "*.files.tar.gz" || true
+          cd site/x86_64
+          ln -sf solara-pkgs.db.tar.gz solara-pkgs.db || true
+          ln -sf solara-pkgs.files.tar.gz solara-pkgs.files || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate pkglist.json
         run: |
-          mkdir -p site/x86_64
-          cp packages/x86_64/*.pkg.tar.zst site/x86_64/ || true
-          cp packages/x86_64/*.db* site/x86_64/ || true
-          cp packages/x86_64/*.files* site/x86_64/ || true
           cp docs-src/index.html site/index.html
           cd site/x86_64
           echo "[" > ../pkglist.json

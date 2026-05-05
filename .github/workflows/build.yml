@@ -2,6 +2,9 @@ name: Build AUR Packages
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'packages.yaml'
 
 jobs:
   build:
@@ -13,26 +16,36 @@ jobs:
 
       - name: Install build tools
         run: |
-          pacman -Sy --noconfirm git base-devel
+          pacman -Sy --noconfirm git base-devel go python-yaml
 
-      - name: Build yay
+      - name: Create builder user
+        run: useradd -m builder && echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+      - name: Build packages
         run: |
-          # Install go (yay dependency) as root
-          pacman -S --noconfirm go
+          mkdir -p /tmp/pkgout
+          python3 - << 'PYEOF'
+import yaml, subprocess, os
 
-          # Create builder user and build
-          useradd -m builder
-          cd /tmp
-          git clone https://aur.archlinux.org/yay.git
-          chown -R builder:builder yay
-          su - builder -c "cd /tmp/yay && makepkg -s --noconfirm --noprogress"
+with open("packages.yaml") as f:
+    pkgs = yaml.safe_load(f)["packages"]
+
+for pkg in pkgs:
+    subprocess.run(["bash", "-c", f"""
+        cd /tmp
+        git clone https://aur.archlinux.org/{pkg}.git
+        chown -R builder:builder /tmp/{pkg}
+        su - builder -c 'cd /tmp/{pkg} && makepkg -s --noconfirm --noprogress'
+        cp /tmp/{pkg}/*.pkg.tar.zst /tmp/pkgout/ || true
+    """], check=True)
+PYEOF
 
       - name: Create package database
         run: |
-          mkdir -p /github/workspace/packages/x86_64
-          cp /tmp/yay/*.pkg.tar.zst /github/workspace/packages/x86_64/
-          cd /github/workspace/packages
-          repo-add solara-pkgs.db.tar.gz x86_64/*.pkg.tar.zst
+          mkdir -p $GITHUB_WORKSPACE/packages/x86_64
+          cp /tmp/pkgout/*.pkg.tar.zst $GITHUB_WORKSPACE/packages/x86_64/
+          cd $GITHUB_WORKSPACE/packages/x86_64
+          repo-add solara-pkgs.db.tar.gz *.pkg.tar.zst
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -56,6 +69,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: latest
           files: packages/x86_64/*.pkg.tar.zst
           name: Latest Packages
           body: |
@@ -65,7 +79,7 @@ jobs:
             ```
             [solara-pkgs]
             SigLevel = Optional TrustAll
-            Server = ${{ github.server_url }}/${{ github.repository }}/releases/download/latest/x86_64
+            Server = ${{ github.server_url }}/${{ github.repository }}/releases/download/latest
             ```
           draft: false
           prerelease: false

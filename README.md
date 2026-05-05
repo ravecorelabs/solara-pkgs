@@ -8,7 +8,7 @@ Add to `/etc/pacman.conf`:
 ```bash
 [solara-pkgs]
 SigLevel = Optional TrustAll
-Server = https://raw.githubusercontent.com/ravecorelabs/solara-pkgs/main/$arch
+Server = https://raw.githubusercontent.com/RaveCore-Labs/solara-pkgs/main/$arch
 ```
 
 Then install packages:

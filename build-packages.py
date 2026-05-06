@@ -22,7 +22,7 @@ for pkg in pkgs:
 
     subprocess.run(["chown", "-R", "builder:builder", clone_dir], check=True)
     result = subprocess.run(
-        ["su", "-", "builder", "-c", f"cd {clone_dir} && makepkg -s --noconfirm --noprogress"]
+        ["su", "-", "builder", "-c", f"cd {clone_dir} && makepkg -s --noconfirm --noprogress --skippgpcheck"]
     )
     if result.returncode != 0:
         print(f"SKIP: build failed for {pkg}")

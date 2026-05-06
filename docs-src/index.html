@@ -194,6 +194,17 @@
 
     .browser { animation: fadeIn 0.4s ease; }
     .warning { animation: fadeIn 0.3s ease 0.1s both; }
+  
+    @media (max-width: 600px) {
+      .container { padding: 24px 16px; }
+      .logo { font-size: 1.5rem; }
+      .browser-header { display: none; }
+      .pkg-row { grid-template-columns: 1fr; gap: 4px; }
+      .pkg-size { display: none; }
+      .pkg-dl { text-align: left; }
+      .usage pre { font-size: 0.68rem; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
   </style>
 </head>
 <body>

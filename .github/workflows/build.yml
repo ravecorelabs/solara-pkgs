@@ -61,15 +61,22 @@ jobs:
       - name: Generate pkglist.json
         run: |
           cd packages/x86_64
-          echo "[" > ../../pkglist.json
-          first=true
-          for f in *.pkg.tar.zst; do
-            [ -f "$f" ] || continue
-            size=$(stat -c%s "$f")
-            if [ "$first" = true ]; then first=false; else echo "," >> ../../pkglist.json; fi
-            echo "{\"name\":\"$f\",\"size\":$size}" >> ../../pkglist.json
-          done
-          echo "]" >> ../../pkglist.json
+          python3 -c "
+import os, json
+pkgs = []
+for f in sorted(os.listdir('.')):
+    if f.endswith('.pkg.tar.zst'):
+        pkgs.append({'name': f, 'size': os.path.getsize(f)})
+print(json.dumps(pkgs, indent=2))
+" > ../../pkglist.json
+          cat ../../pkglist.json
+
+      - name: Delete old release
+        run: |
+          gh release delete latest --yes || true
+          git push origin :refs/tags/latest || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -122,15 +129,15 @@ jobs:
         run: |
           cp docs-src/index.html site/index.html
           cd site/x86_64
-          echo "[" > ../pkglist.json
-          first=true
-          for f in *.pkg.tar.zst; do
-            [ -f "$f" ] || continue
-            size=$(stat -c%s "$f")
-            if [ "$first" = true ]; then first=false; else echo "," >> ../pkglist.json; fi
-            echo "{\"name\":\"$f\",\"size\":$size}" >> ../pkglist.json
-          done
-          echo "]" >> ../pkglist.json
+          python3 -c "
+import os, json
+pkgs = []
+for f in sorted(os.listdir('.')):
+    if f.endswith('.pkg.tar.zst'):
+        pkgs.append({'name': f, 'size': os.path.getsize(f)})
+print(json.dumps(pkgs, indent=2))
+" > ../pkglist.json
+          cat ../pkglist.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

@@ -22,8 +22,8 @@ jobs:
           CURRENT=$(grep -oP 'pkgver=[0-9]+\.[0-9]+' PKGBUILD | cut -d= -f2)
           echo "Current: $CURRENT"
           
-          # Check CachyOS share server for latest version
-          LATEST=$(curl -s https://share.cachyos.org/x86_64_v3/kernel/7.0/ | grep -oP 'linux-cachyos-7\.[0-9]+\.[0-9]+-[0-9]+-x86_64_v3\.pkg\.tar\.zst' | sort -V | tail -1 | grep -oP '7\.[0-9]+\.[0-9]+-[0-9]+' | cut -d- -f1,2 | tr '-' '.')
+          # Check CachyOS packages for latest version
+          LATEST=$(curl -s "https://packages.cachyos.org/package/cachyos-v3/x86_64_v3/linux-cachyos" | grep -oP 'Version\s+[0-9]+\.[0-9]+\.[0-9]+' | grep -oP '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
           echo "Latest on CachyOS: $LATEST"
           
           echo "NEW_VERSION=$LATEST" >> $GITHUB_OUTPUT

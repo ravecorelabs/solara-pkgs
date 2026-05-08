@@ -30,7 +30,7 @@ prepare() {
     cd linux-7.0.5
     
     # Extract and apply ZEN patches
-    tar -xf "https://github.com/zen-kernel/zen-kernel/releases/download/v2.0/7.0.5/linux-v7.0.5-zen1.patch.zst"
+    tar -xf "${srcdir}/linux-v7.0.5-zen1.patch.zst"
     
     # Apply all patches from ZEN release
     for patch in *.patch; do
@@ -39,9 +39,13 @@ prepare() {
     
     # Use ZEN defconfig
     make x86_64_defconfig
-    make menuconfig  # Allow user customization
     
-    echo "ZEN kernel configured!"
+    # 🔥 SOLARA BRANDING 🔥
+    sed -i 's/CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION="-solara"/g' .config
+    sed -i 's/CONFIG_DEFAULT_HOSTNAME=.*/CONFIG_DEFAULT_HOSTNAME="solara"/g' .config
+    sed -i 's/CONFIG_LOCALVERSION_AUTO=.*/CONFIG_LOCALVERSION_AUTO=n/g' .config
+    
+    echo "🔥 SOLARA BRANDING APPLIED! 🔥"
 }
 
 build() {

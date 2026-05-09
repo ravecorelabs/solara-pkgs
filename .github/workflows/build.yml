@@ -106,9 +106,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   pages:
-    needs: release
+    needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || needs.release.outputs.packages_changed == 'true'
+    if: always()
     permissions:
       contents: write
       pages: write

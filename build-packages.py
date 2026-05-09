@@ -27,7 +27,7 @@ for pkg in pkgs:
     # Install kernel after kernel build, before headers
     if pkg == "solara-kernel":
         for pf in os.listdir("/tmp/pkgout"):
-            if "solara-kernel" in pf and "debug" not in pf and pf.endswith(".pkg.tar.zst"):
+            if pf.startswith("solara-kernel-") and "headers" not in pf and pf.endswith(".pkg.tar.zst"):
                 subprocess.run(["chown", "root:root", f"/tmp/pkgout/{pf}"])
                 subprocess.run(["sudo", "pacman", "-U", "--noconfirm", f"/tmp/pkgout/{pf}"])
 

@@ -2,11 +2,6 @@ name: Build AUR Packages
 
 on:
   workflow_dispatch:
-    inputs:
-      pages_only:
-        type: boolean
-        description: 'Update GitHub Pages only (skip build)'
-        default: false
   push:
     paths:
       - 'packages.yaml'
@@ -15,7 +10,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.event_name != 'workflow_dispatch' || github.event.inputs.pages_only != 'true'
     container: ghcr.io/archlinux/archlinux:latest
     steps:
       - name: Checkout repo
@@ -53,7 +47,6 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name != 'workflow_dispatch' || github.event.inputs.pages_only != 'true'
     permissions:
       contents: write
     steps:
@@ -106,9 +99,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   pages:
-    needs: build
+    needs: release
     runs-on: ubuntu-latest
-    if: always()
+    if: github.event_name == 'workflow_dispatch' || (needs.release.result == 'success' || needs.release.result == 'skipped')
     permissions:
       contents: write
       pages: write

@@ -15,6 +15,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.inputs.pages_only != 'true'
     container: ghcr.io/archlinux/archlinux:latest
     steps:
       - name: Checkout repo
@@ -52,11 +53,9 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || needs.build.outputs.success == 'true' || needs.build.outputs.skipped == 'true'
+    if: github.event_name != 'workflow_dispatch' || github.inputs.pages_only != 'true'
     permissions:
       contents: write
-    outputs:
-      success: 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4

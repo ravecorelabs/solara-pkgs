@@ -15,7 +15,7 @@ if ! grep -q "\[solara-pkgs\]" /etc/pacman.conf; then
 
 [solara-pkgs]
 SigLevel = Optional TrustAll
-Server = https://github.com/ravecorelabs/solara-pkgs/releases/download/latest
+Server = https://celestia-foundation.github.io/solara-pkgs/x86_64
 CONF
     echo "Added solara-pkgs to pacman.conf"
 else

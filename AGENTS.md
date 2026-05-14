@@ -2,13 +2,13 @@
 
 ## Owner
 - **Org**: `celestia-foundation` (formerly `ravecorelabs` — yes, we rebranded. no, the old AI didn't get the memo.)
-- Personal account `RaveCore-Labs` was never the target. It still isn't. Move on.
+- Personal account `c-ludenberg` (formerly `RaveCore-Labs` — rebranding is a hobby at this point)
 
 ## Repo
 - `celestia-foundation/solara-pkgs` - SOLARA Linux AUR package repo
 
 ## IMPORTANT
-- ALWAYS push to `celestia-foundation` (NOT `ravecorelabs`, NOT `RaveCore-Labs`, NOT whatever typo you're about to make)
+- ALWAYS push to `celestia-foundation` (NOT `ravecorelabs`, NOT `c-ludenberg`, NOT whatever typo you're about to make)
 - GitHub URLs are case-sensitive. And org-name-sensitive. And reading-comprehension-sensitive.
 
 ## Project Details

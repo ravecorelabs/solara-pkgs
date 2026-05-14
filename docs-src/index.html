@@ -579,6 +579,7 @@
           <span class="panel-title">packages</span>
           <span class="panel-count" id="pkg-count">0</span>
         </div>
+        <input type="text" id="pkg-search" placeholder="filter packages..." oninput="filterPackages()" style="width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.72rem;outline:none;margin-bottom:8px;box-sizing:border-box;">
         <div class="pkg-list" id="pkg-list">
           <div class="loading">
             <span class="loading-dot"></span>
@@ -677,65 +678,72 @@ Server = https://celestia-foundation.github.io/solara-pkgs/x86_64</pre>
         const res = await fetch('pkglist.json');
         const pkgs = await res.json();
         if (!pkgs.length) {
-          list.innerHTML = '<div class="loading">no packages found</div>';
+          list.innerHTML = '<div class="preview-empty" style="padding:32px 16px"><div>no packages found</div><span>the repo might be empty</span></div>';
           return;
         }
 
-        const mainPkgs = pkgs.filter(p => !isDebug(p.name));
-        countBadge.textContent = mainPkgs.length;
-        countBadge2.textContent = mainPkgs.length + ' packages';
-
-        const groups = {};
-        for (const p of mainPkgs) {
-          const base = cleanName(p.name);
-          if (!groups[base]) groups[base] = [];
-          groups[base].push(p);
-        }
-
-        const groupOrder = ['solara-kernel', 'yay', 'visual-studio-code-bin', 'arc-gtk-theme', 'arc-icon-theme', 'arc-solid-gtk-theme'];
-
-        list.innerHTML = groupOrder.map(base => {
-          if (!groups[base]) return '';
-          const pkgs = groups[base];
-          const first = pkgs[0];
-          const cat = categorize(first.name);
-          const version = extractVersion(first.name);
-          const size = formatSize(first.size);
-          const arch = extractArch(first.name);
-
-          return `
-            <div class="group-header">${base}</div>
-            ${pkgs.map(p => {
-              const cat = categorize(p.name);
-              return `<div class="pkg-item" data-name="${p.name}" data-arch="${extractArch(p.name)}" data-version="${extractVersion(p.name)}" data-size="${p.size}" data-cat="${cat}">
-                <div class="pkg-icon-wrap ${cat}">${CAT_ICONS[cat]}</div>
-                <div class="pkg-info">
-                  <div class="pkg-name">${p.name}</div>
-                  <div class="pkg-meta">
-                    <span class="pkg-version-tag">${extractVersion(p.name)}</span>
-                    <span>${formatSize(p.size)}</span>
-                  </div>
-                </div>
-                <a class="pkg-dl-btn" href="x86_64/${p.name}" download title="Download ${p.name}">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                </a>
-              </div>`;
-            }).join('')}`;
-        }).join('') || '<div class="loading">no packages</div>';
-
-        document.querySelectorAll('.pkg-item').forEach(el => {
-          el.addEventListener('click', function(e) {
-            if (e.target.closest('.pkg-dl-btn')) return;
-            document.querySelectorAll('.pkg-item').forEach(x => x.classList.remove('active'));
-            this.classList.add('active');
-            showPreview(this.dataset);
-          });
-        });
+        window._allPkgs = pkgs.filter(p => !isDebug(p.name));
+        countBadge.textContent = window._allPkgs.length;
+        countBadge2.textContent = window._allPkgs.length + ' packages';
+        renderPackages(window._allPkgs);
 
       } catch (e) {
         console.error(e);
-        list.innerHTML = '<div class="loading">could not load package list</div>';
+        list.innerHTML = '<div class="preview-empty" style="padding:32px 16px"><div>could not load packages</div><span>check your connection or try again</span></div>';
       }
+    }
+
+    function renderPackages(pkgs) {
+      const list = document.getElementById('pkg-list');
+      const groups = {};
+      for (const p of pkgs) {
+        const base = cleanName(p.name);
+        if (!groups[base]) groups[base] = [];
+        groups[base].push(p);
+      }
+
+      const groupOrder = ['solara-kernel', 'yay', 'visual-studio-code-bin', 'arc-gtk-theme', 'arc-icon-theme', 'arc-solid-gtk-theme'];
+
+      list.innerHTML = groupOrder.map(base => {
+        if (!groups[base]) return '';
+        return `
+          <div class="group-header">${base}</div>
+          ${groups[base].map(p => {
+            const cat = categorize(p.name);
+            return `<div class="pkg-item" data-name="${p.name}" data-arch="${extractArch(p.name)}" data-version="${extractVersion(p.name)}" data-size="${p.size}" data-cat="${cat}">
+              <div class="pkg-icon-wrap ${cat}">${CAT_ICONS[cat]}</div>
+              <div class="pkg-info">
+                <div class="pkg-name">${p.name}</div>
+                <div class="pkg-meta">
+                  <span class="pkg-version-tag">${extractVersion(p.name)}</span>
+                  <span>${formatSize(p.size)}</span>
+                </div>
+              </div>
+              <a class="pkg-dl-btn" href="x86_64/${p.name}" download title="Download ${p.name}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </a>
+            </div>`;
+          }).join('')}`;
+      }).join('') || '<div class="preview-empty" style="padding:32px 16px"><div>no packages</div></div>';
+
+      document.querySelectorAll('.pkg-item').forEach(el => {
+        el.addEventListener('click', function(e) {
+          if (e.target.closest('.pkg-dl-btn')) return;
+          document.querySelectorAll('.pkg-item').forEach(x => x.classList.remove('active'));
+          this.classList.add('active');
+          showPreview(this.dataset);
+        });
+      });
+    }
+
+    function filterPackages() {
+      if (!window._allPkgs) return;
+      const q = document.getElementById('pkg-search').value.toLowerCase().trim();
+      const filtered = window._allPkgs.filter(p =>
+        p.name.toLowerCase().includes(q)
+      );
+      document.getElementById('pkg-count').textContent = filtered.length;
+      renderPackages(filtered);
     }
 
     function showPreview(data) {

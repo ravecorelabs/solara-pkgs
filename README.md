@@ -43,4 +43,4 @@ pacman -S yay visual-studio-code-bin arc-gtk-theme arc-icon-theme
 
 ## License
 
-GPL-3.0
+[Solara Linux License (SLL)](LICENSE) — Do whatever you want, just don't be a dick.

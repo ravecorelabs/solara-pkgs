@@ -1,19 +1,33 @@
-GNU GENERAL PUBLIC LICENSE
-Version 3, 29 June 2007
+# Solara Linux License (SLL)
 
-Copyright (C) RaveCore Labs
+## TL;DR: Do whatever you want, just don't be a dick
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+### The "Do What The Fuck You Want To" Clause
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+Permission is hereby granted, free of charge, to anyone obtaining a copy of this software to do whatever the fuck they want with it. No really, we don't care.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <https://www.gnu.org/licenses/>.
+### Conditions
 
-SPDX-License-Identifier: GPL-3.0-or-later
+1. **Don't blame us** - If your computer explodes, your cat dies, or your Wi-Fi starts playing Taylor Swift on loop, that's on you.
+
+2. **Don't say you made it** - If you remix Solara, cool. Just don't pretend you invented it. Give credit where credit is due, or don't. We honestly don't care.
+
+3. **No warranty, seriously** - This software is provided "as is". If it breaks, you get to keep both pieces.
+
+4. **We don't want your money** - Keep your wallets. We said keep them. We mean it. Why are you still reaching for your wallet? Stop.
+
+5. **The "Weeb" Clause** - Using this to host CP, mine crypto on someone else's server, or do anything actually illegal? That's on you. We're not your mom.
+
+### The "We Give Up" Disclaimer
+
+We have no idea what we're doing. This distro was born from existential dread and a refusal to use GNOME. If it works, consider it a miracle.
+
+### Trademark Notice
+
+"Solara Linux" and the sunrise logo are trademarks of Celestia Foundation. Use them if you want, we probably won't notice. Or care.
+
+---
+
+*Made in Poland with barely contained chaos and questionable decisions.*
+
+*License version: 1.0 (we might change this later, who knows)*

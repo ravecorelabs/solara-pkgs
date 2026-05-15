@@ -134,6 +134,70 @@
       align-items: center;
     }
 
+    .celebration-banner {
+      background: linear-gradient(135deg, rgba(224, 138, 60, 0.15) 0%, rgba(122, 140, 255, 0.15) 100%);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 20px rgba(224, 138, 60, 0.2); }
+      to { box-shadow: 0 0 30px rgba(122, 140, 255, 0.3); }
+    }
+
+    .celebration-banner h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .celebration-banner p {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .celebration-banner .kernel-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #0a0a10;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      animation: fall linear forwards;
+      pointer-events: none;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
+    }
+
+    .confetti-emoji { font-size: 16px; animation: fall-emoji linear forwards; }
+    @keyframes fall-emoji {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(400px) rotate(360deg); opacity: 0; }
+    }
+
     .badge {
       background: var(--surface2);
       border: 1px solid var(--border);
@@ -573,6 +637,13 @@
       </div>
     </div>
 
+    <div class="celebration-banner" id="celebration">
+      <h2>🎉 SOLARA KERNEL 7.0.6 IS HERE!</h2>
+      <p>The wait is over. Maximum POWER kernel with BORE scheduler is now available.</p>
+      <p style="margin-top:8px">Install with: <code style="background:var(--surface);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;">sudo pacman -S solara-kernel</code></p>
+      <span class="kernel-badge">7.0.6</span>
+    </div>
+
     <div class="main-layout">
       <div class="left-panel">
         <div class="panel-header">
@@ -796,6 +867,30 @@ Server = https://celestia-foundation.github.io/solara-pkgs/x86_64</pre>
     }
 
     loadPackages();
+
+    // Confetti celebration!
+    const confettiEmojis = ['🎉', '🔥', '🟧', '🟦', '⭐', '✨', '💥'];
+    const banner = document.getElementById('celebration');
+    
+    function createConfetti() {
+      const rect = banner.getBoundingClientRect();
+      for (let i = 0; i < 30; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti-emoji';
+        confetti.textContent = confettiEmojis[Math.floor(Math.random() * confettiEmojis.length)];
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.position = 'absolute';
+        confetti.style.top = '-20px';
+        confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        banner.appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 4000);
+      }
+    }
+    
+    createConfetti();
+    setInterval(createConfetti, 8000);
   </script>
 </body>
 </html>
